@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "CSA.h"
 
 @interface ViewController ()
 
@@ -17,6 +18,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    
+    CSA *clonal = [CSA new];
+    [clonal calculateBestValue];
 }
 
 - (void)didReceiveMemoryWarning {
