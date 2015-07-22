@@ -28,6 +28,8 @@
     self.valuesForGeneticAlgorithm = [NSMutableArray new];
     
     NSMutableArray *bestValues = [NSMutableArray new];
+    NSMutableArray *iteractions = [NSMutableArray new];
+    NSMutableArray *time = [NSMutableArray new];
     
     NSMutableArray *fitnessArray = [NSMutableArray new];
     self.triesAfterGetBestDNA = 0;
@@ -59,26 +61,58 @@
 //        position++;
 //    }
     
-    //stop condition: the algorithm can't find any better value after MAXTRIESAFTERBESTVALUE tries
-    while (self.triesAfterGetBestDNA < MAXTRIESAFTERBESTVALUE) {
-        for (NSArray *aParent in self.parentsArray) {
-            self.bestDNA = [self changeDNAForBestSequence:aParent];
+    for (int counter = 0; counter < 100; counter++) {
+        NSDate *date = [NSDate date];
+        
+        //stop condition: the algorithm can't find any better value after MAXTRIESAFTERBESTVALUE tries
+        while (self.triesAfterGetBestDNA < MAXTRIESAFTERBESTVALUE) {
+            for (NSArray *aParent in self.parentsArray) {
+                self.bestDNA = [self changeDNAForBestSequence:aParent];
+            }
+            
+            for (NSArray *compareArray in self.parentsArray) {
+                int fitness = [self fitnessBetweenCreatedArray:compareArray andTargetArray:self.bestDNA];
+                fitnessArray[position] = @(fitness);
+                position++;
+            }
+            
+            self.parentsArray = [self mutagenicParentsArrayFromParentsArray:self.parentsArray usingFitnessArray:fitnessArray];
+            
+            self.triesAfterGetBestDNA++;
+            iteraction++;
+            //        self.antigeneArray = [self bestDNAFromParents:self.parentsArray usingFitnessArray:fitnessArray];
         }
         
-        for (NSArray *compareArray in self.parentsArray) {
-            int fitness = [self fitnessBetweenCreatedArray:compareArray andTargetArray:self.bestDNA];
-            fitnessArray[position] = @(fitness);
-            position++;
-        }
         
-        self.parentsArray = [self mutagenicParentsArrayFromParentsArray:self.parentsArray usingFitnessArray:fitnessArray];
         
-        self.triesAfterGetBestDNA++;
-        iteraction++;
-//        self.antigeneArray = [self bestDNAFromParents:self.parentsArray usingFitnessArray:fitnessArray];
+        NSLog(@"Best value: %f in iteraction %i, time: %f", [self functionForExercise:[self numberFromDNASequence:self.bestDNA]], iteraction, -[date timeIntervalSinceNow]);
+        
+        [bestValues addObject:@([self functionForExercise:[self numberFromDNASequence:self.bestDNA]])];
+        [iteractions addObject:@(iteraction)];
+        [time addObject:@(-[date timeIntervalSinceNow])];
+        
+        iteraction = 0;
+        
+        NSMutableArray *fitnessArray = [NSMutableArray new];
+        self.triesAfterGetBestDNA = 0;
+        
+        //starting my tests from 0
+        self.bestDNA = @[@0,@0,@0,@0,@0,@0,@0,@0,@0,@0,@0,@0];
+        
+        
+        //matrix used for comparing results
+        self.parentsArray = @[    @[@0,@0,@0,@0,@0,@0,@0,@1,@0,@0,@0,@1],
+                                  @[@1,@0,@0,@0,@0,@0,@0,@1,@0,@0,@0,@0],
+                                  @[@0,@0,@0,@0,@0,@0,@0,@1,@0,@1,@0,@1],
+                                  @[@0,@0,@0,@0,@0,@1,@0,@1,@0,@1,@0,@0],
+                                  @[@0,@1,@0,@0,@0,@0,@0,@1,@0,@0,@0,@1],
+                                  @[@0,@0,@0,@0,@0,@0,@0,@1,@0,@0,@0,@0],
+                                  @[@1,@0,@0,@0,@0,@0,@0,@1,@0,@1,@0,@1],
+                                  @[@0,@0,@0,@0,@0,@0,@0,@1,@0,@1,@0,@0]  ];
     }
     
-    NSLog(@"Best value: %f in iteraction %i", [self functionForExercise:[self numberFromDNASequence:self.bestDNA]], iteraction);
+    NSLog(@"Medium of best values: %f, medium of iteractions: %f, medium of time: %f",[self mediumNumberInArray:bestValues], [self mediumNumberInArray:iteractions], [self mediumNumberInArray:time]);
+    
 }
 
 #pragma mark - mutagenic action
@@ -184,6 +218,16 @@
     return part3 * part4;
     //return powf(2, powf(-2*(initialValue - 0.1) / (0.9), 2)) * sin(5*3.14*initialValue);
     
+}
+
+-(float)mediumNumberInArray:(NSArray *)array{
+    float returnValue = 0;
+    
+    for (NSNumber *number in array) {
+        returnValue += [number floatValue];
+    }
+    
+    return returnValue/[array count];
 }
 
 @end
